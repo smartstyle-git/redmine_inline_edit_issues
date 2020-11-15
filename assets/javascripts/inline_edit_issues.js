@@ -1,57 +1,57 @@
-$(document).ready(function() {
+$(document).ready(function () {
     // Avoid autofocus
-    $(function(){
+    $(function () {
         $('input').blur();
     });
 
-    $(function() {
-        $('#inline_edit_form td input, #inline_edit_form td select').each(function() {
+    $(function () {
+        $('#inline_edit_form td input, #inline_edit_form td select, #inline_edit_form td span.select2').each(function () {
             $.data(this, 'default', this.value);
-        }).css("color", "black").focus(function() {
+        }).css("color", "black").focus(function () {
             if (!$.data(this, 'edited')) {
                 // Change form inputs to red.
-                if (!$(this).is(":checkbox")){
-                    $(this).css({"color" : "red"});
+                if (!$(this).is(":checkbox")) {
+                    $(this).css({"color": "red"});
                 }
             }
-        }).change(function() {
+        }).change(function () {
             var curValue = getCurrentValue(this);
             var defValue = getDefaultValue($(this));
             var editedVal = (curValue != defValue);
             $.data(this, 'edited', editedVal);
-            if($(this).is(":checkbox")){
-               if (editedVal){
-                  $(this).parent().addClass('has_background');
-               }else{
-                   $(this).parent().removeClass('has_background');
-               }
+            if ($(this).is(":checkbox")) {
+                if (editedVal) {
+                    $(this).parent().addClass('has_background');
+                } else {
+                    $(this).parent().removeClass('has_background');
+                }
             }
-        }).blur(function() {
+        }).blur(function () {
             if (!$.data(this, 'edited')) {
                 this.value = $.data(this, 'default');
                 $(this).css("color", "black");
             }
-        }).hover(function() {
+        }).hover(function () {
             if (!($(this).is(":checkbox"))) {
                 var originalValue = getDefaultValue($(this)) || "--BLANK--";
                 displayOriginalValue($(this), originalValue);
             }
-        }, function() {
-            $('#field_original_value').html(" ");
+        }, function () {
             $('#field_original').hide();
+            $('#field_original_value').html(" ");
         });
     });
-    
-    
+
+
     // Reset Everything...
-    $('#inline_edit_reset').click(function() {
+    $('#inline_edit_reset').click(function () {
         $('#inline_edit_form')[0].reset();
         calcAllGroupEstimatedHours();
         calcTotalEstimatedHours();
-        $('#inline_edit_form td input, #inline_edit_form td select').css("color", "black").each(function() {
+        $('#inline_edit_form td input, #inline_edit_form td select').css("color", "black").each(function () {
             $.data(this, 'edited', false);
-            if($(this).is(":checkbox")){
-               $(this).parent().removeClass('has_background');
+            if ($(this).is(":checkbox")) {
+                $(this).parent().removeClass('has_background');
             }
         });
     });
@@ -59,7 +59,7 @@ $(document).ready(function() {
     // Calculate Total Estimated Hours
     function calcTotalEstimatedHours() {
         var total = 0.0;
-        $('[id$=_estimated_hours]').each(function() {
+        $('[id$=_estimated_hours]').each(function () {
             total += parseFloat($(this).val()) || 0;
         });
 
@@ -72,7 +72,7 @@ $(document).ready(function() {
         var previousGroupName = "";
 
         // Loop through only the estimated hours columns that have a grouping
-        $('td[class*="estimated_hours group_"]').each(function() {
+        $('td[class*="estimated_hours group_"]').each(function () {
             var myClass = $(this).attr('class');
             var groupPos = myClass.search("group");
             if (groupPos >= 0) {
@@ -101,7 +101,7 @@ $(document).ready(function() {
         // loop through all elements in this group and sum the Estimated Hours
         var loopName = "td.estimated_hours." + groupName;
         var groupTotal = 0.0;
-        $(loopName).each(function() {
+        $(loopName).each(function () {
             groupTotal += parseFloat($(this).children().val()) || 0;
         });
         //alert(groupTotal);
@@ -115,57 +115,56 @@ $(document).ready(function() {
 
     // If user changes an estimated hours input,
     // update totals and group totals
-    $('td.estimated_hours input').change(function() {
+    $('td.estimated_hours input').change(function () {
         calcCurrentGroupEstimatedHours($(this));
         calcTotalEstimatedHours();
     });
 
     // On hover, display the field's default (original) value
     function displayOriginalValue(element, originalValue) {
-        var pos = element.position();
-        var width = element.outerWidth();
+        var pos = element.offset();
+        var height = element.outerHeight();
         $('#field_original_value').html(originalValue);
         $('#field_original').css({
-            position : "absolute",
-            top : pos.top + "px",
-            left : (pos.left + width) + "px"
+            position: "absolute",
+            top: (pos.top + height + 5) + "px",
+            left: pos.left + "px"
         }).show();
     }
 
-    function getCurrentValue(el){
-       if ($(el).is(":checkbox")){
-           var currentValue = $(el).is(":checked") ? "True" : "False";
-       }else{
-          var currentValue = $("option:selected", el).text() || el.value;
-       }
-       return currentValue;
+    function getCurrentValue(el) {
+        if ($(el).is(":checkbox")) {
+            var currentValue = $(el).is(":checked") ? "True" : "False";
+        } else {
+            var currentValue = $("option:selected", el).text() || el.value;
+        }
+        return currentValue;
     }
-    
-    
+
 
     function getDefaultValue(element) {
-        if (element.is(":checkbox")){
-           var originalValue = element.prop("defaultChecked") ? "True" : "False";
-        }else{
-           var originalValue = element.prop("defaultValue") || element.find('option[selected]').text();
+        if (element.is(":checkbox")) {
+            var originalValue = element.prop("defaultChecked") ? "True" : "False";
+        } else {
+            var originalValue = element.prop("defaultValue") || element.find('option[selected]').text();
         }
         return originalValue;
     }
-    
+
 
     // handle changes from the datepicker	
-    if(window.datepickerOptions) {
-        window.datepickerOptions.onSelect = function() {
+    if (window.datepickerOptions) {
+        window.datepickerOptions.onSelect = function () {
             var curValue = getCurrentValue(this);
             var defValue = getDefaultValue($(this));
             if (curValue != defValue) {
-                $(this).css({"color" : "red"});
+                $(this).css({"color": "red"});
                 $.data(this, 'edited', true);
             } else {
-                $(this).css({"color" : "black"});
+                $(this).css({"color": "black"});
                 $.data(this, 'edited', false);
             }
-        }; 
+        };
     }
 
 });
