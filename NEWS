@@ -1,2 +1,7 @@
+28-11-2020 2.0.1
+[Fix] Support date, user and version field types
+[Feature] Compatible with select2 plugin
+[TODO] Support file field
+
 15-11-2020 2.0.0
 [Feature] Plugin is now compatible with redmine 3.4 and 4.1
