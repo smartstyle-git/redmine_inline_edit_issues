@@ -1,23 +1,23 @@
-#Redmine inline edit issues
+# Redmine inline edit issues
 
 This is a redmine plugin that allows you to edit fields of multiple issues in one view.
 
-##Installation
+## Installation
 
 * To install this plugin just clone it in your redmine's plugins folder
 * Run `rake redmine:plugins:migrate RAILS_ENV=production` in your redmine folder
 * Restart your webserver
 
-##Usage
+## Usage
 
-###How to get to the Inline Edit screen
+### How to get to the Inline Edit screen
 * Select a Project
 * Click on the "Issues" tab.
 * Check 2 or more issues (or click on the check at the top to select all).
 * Right Click
 * In the context menu, click on "Edit Inline"
 
-###Editing fields
+### Editing fields
 * The issues should appear as a form.  
 * The issues that can be edited appear as the appropriate form field (text, select, checkbox, etc.)
 * Fields that have been edited but not yet submitted will show as red.
