@@ -1,4 +1,4 @@
-require_dependency 'inline_edit_hooks'
+require_relative 'lib/inline_edit_hooks'
 
 Redmine::Plugin.register :redmine_inline_edit_issues do
   name 'Inline Edit Issues plugin'
@@ -6,9 +6,11 @@ Redmine::Plugin.register :redmine_inline_edit_issues do
   description 'This is a plugin for Redmine.  It allows inline edit of issues in the issues index page.'
   version '2.0.1'
 
-  requires_redmine :version_or_higher => '3.0.0'
+  requires_redmine :version_or_higher => '6.0.0'
 
-
+  # Exclude app/overrides from Zeitwerk autoloading (Rails 7)
+  Rails.autoloaders.main.ignore(File.expand_path("../app/overrides", __FILE__))
+  
   Rails.application.paths["app/overrides"] ||= []
   Rails.application.paths["app/overrides"] << File.expand_path("../app/overrides", __FILE__)
   

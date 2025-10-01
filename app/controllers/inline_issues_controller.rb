@@ -1,16 +1,9 @@
 class InlineIssuesController < ApplicationController
 
-  if Rails::VERSION::MAJOR >= 5
-    before_action :find_project, :only => [:edit_multiple, :update_multiple]
-    before_action :retrieve_query, :get_ids_before_edit, :only => [:edit_multiple]
-    before_action :get_ids_before_update, :only => [:update_multiple]
-    before_action :find_projects, :authorize, :only => [:edit_multiple, :update_multiple]
-  else
-    before_filter :find_project, :only => [:edit_multiple, :update_multiple]
-    before_filter :retrieve_query, :get_ids_before_edit, :only => [:edit_multiple]
-    before_filter :get_ids_before_update, :only => [:update_multiple]
-    before_filter :find_projects, :authorize, :only => [:edit_multiple, :update_multiple]
-  end
+  before_action :find_project, :only => [:edit_multiple, :update_multiple]
+  before_action :retrieve_query, :get_ids_before_edit, :only => [:edit_multiple]
+  before_action :get_ids_before_update, :only => [:update_multiple]
+  before_action :find_projects, :authorize, :only => [:edit_multiple, :update_multiple]
 
   helper :queries
   include QueriesHelper
@@ -58,21 +51,21 @@ class InlineIssuesController < ApplicationController
     render_404
   rescue Query::StatementInvalid
     flash[:error] = l('label_no_issues_selected')
-    redirect_to :back
+    redirect_back(fallback_location: root_path)
   end
 
   def update_multiple
     errors = []
     puts params[:issues].inspect
     Issue.find(params[:issues].keys).each do |i|
-      attribute_hash = params[:issues][i.id.to_s].to_unsafe_hash
+      attribute_hash = params[:issues][i.id.to_s].to_unsafe_h
       upd = i.update(attribute_hash)
       errors += i.errors.full_messages.map { |m| l(:label_issue) + " #{i.id}: " + m } if !upd
     end
 
     if errors.present?
       flash[:error] = errors.to_sentence
-      redirect_to :back
+      redirect_back(fallback_location: root_path)
     else
       flash[:notice] = l(:notice_successful_update)
       redirect_back_or_default params[:back_url] #_project_issues_path(@project)
