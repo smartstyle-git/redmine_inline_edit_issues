@@ -18,9 +18,12 @@ class InlineIssuesController < ApplicationController
                                 @query.inline_columns.insert(1, description_column) :
                                 @query.inline_columns
 
-    sort_init(@query.sort_criteria.empty? ? [['id', 'desc']] : @query.sort_criteria)
+    # デフォルトで ID 降順にソート
+    default_sort = [['id', 'desc']]
+    sort_init(@query.sort_criteria.empty? ? default_sort : @query.sort_criteria)
     sort_update(@query.sortable_columns)
-    @query.sort_criteria = sort_criteria.to_a
+    # ソート条件が指定されていない場合はデフォルトの降順を使用
+    @query.sort_criteria = sort_criteria.to_a.presence || default_sort
 
     if @query.valid?
       @limit = per_page_option
@@ -156,6 +159,9 @@ class InlineIssuesController < ApplicationController
       elsif params[:ids].class.name == "String"
         @ids = params[:ids].split(" ")
       end
+    elsif params[:issues].present?
+      # params[:ids]がない場合（全チケット編集時）、params[:issues]のキーから取得
+      @ids = params[:issues].keys
     end
     @ids
   end
@@ -166,7 +172,7 @@ class InlineIssuesController < ApplicationController
   end
 
   def find_projects
-    @projects = @ids ? Issue.find(@ids).map(&:project).uniq : nil
+    @projects = @ids.present? ? Issue.find(@ids).map(&:project).uniq : nil
   end
 
   # Returns the issue count by group or nil if query is not grouped

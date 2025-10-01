@@ -7,13 +7,6 @@ $(document).ready(function () {
     $(function () {
         $('#inline_edit_form td input, #inline_edit_form td select, #inline_edit_form td span.select2').each(function () {
             $.data(this, 'default', this.value);
-        }).css("color", "black").focus(function () {
-            if (!$.data(this, 'edited')) {
-                // Change form inputs to red.
-                if (!$(this).is(":checkbox")) {
-                    $(this).css({"color": "red"});
-                }
-            }
         }).change(function () {
             var curValue = getCurrentValue(this);
             var defValue = getDefaultValue($(this));
@@ -29,16 +22,7 @@ $(document).ready(function () {
         }).blur(function () {
             if (!$.data(this, 'edited')) {
                 this.value = $.data(this, 'default');
-                $(this).css("color", "black");
             }
-        }).hover(function () {
-            if (!($(this).is(":checkbox"))) {
-                var originalValue = getDefaultValue($(this)) || "--BLANK--";
-                displayOriginalValue($(this), originalValue);
-            }
-        }, function () {
-            $('#field_original').hide();
-            $('#field_original_value').html(" ");
         });
     });
 
@@ -158,10 +142,8 @@ $(document).ready(function () {
             var curValue = getCurrentValue(this);
             var defValue = getDefaultValue($(this));
             if (curValue != defValue) {
-                $(this).css({"color": "red"});
                 $.data(this, 'edited', true);
             } else {
-                $(this).css({"color": "black"});
                 $.data(this, 'edited', false);
             }
         };
@@ -219,11 +201,8 @@ $(document).ready(function () {
         // Show remove button
         $newRow.find('.remove-new-issue').show();
         
-        // Add visual separator
-        $newRow.css('border-top', '2px solid #ccc');
-        $newRow.css('padding-top', '10px');
-        
-        $('#new-issues-tbody').append($newRow);
+        // 追加ボタンの行の前に挿入
+        $('#add-new-issue-row').closest('tr').before($newRow);
         
         console.log('New row added with index:', newIssueIndex);
         newIssueIndex++;

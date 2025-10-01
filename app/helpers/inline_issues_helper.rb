@@ -93,7 +93,12 @@ module InlineIssuesHelper
   end
 
   def inline_edit_condition
-    cond = "issues.id in (#{@ids.map { |i| i.to_i }.join(',')})"
+    # @idsが空の場合は条件なし（全チケットを対象）
+    if @ids.present?
+      "issues.id in (#{@ids.map { |i| i.to_i }.join(',')})"
+    else
+      nil
+    end
   end
 
   def group_class_name(group)
@@ -125,7 +130,7 @@ module InlineIssuesHelper
       other_issue = relation.other_issue(issue)
       next unless other_issue && other_issue.visible?
       
-      relation_label = "#{l(relation.label_for(issue))} ##{other_issue.id}"
+      relation_label = "#{relation.label_for(issue)} ##{other_issue.id}"
       checkbox_name = "issues[#{issue.id}][delete_relation_ids][]"
       
       content << content_tag(:div, class: 'relation-item') do

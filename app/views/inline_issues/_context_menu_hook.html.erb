@@ -1,4 +1,4 @@
-<% if !@issue and params[:back_url].present? %>
+<% if params[:back_url].present? %>
     <li>
     	<%
     	uri = URI.parse(params[:back_url])
@@ -6,8 +6,9 @@
 	    	args = CGI.parse(uri.query)
 	    	col = args.keys.include?('c[]') ? args['c[]'] : nil
 	    end
+	    # 常に全チケットを表示するため、idsパラメータはnilにする
+	    ids_param = nil
     	%>
-        <%= context_menu_link l(:button_inline_edit), @project ? edit_multiple_project_inline_issues_path(@project, :ids => @issue_ids, :c => col) : edit_multiple_inline_issues_path(:ids => @issue_ids, :back_url => params[:back_url], :c => col), :disabled => !@can[:edit] %>
-        <%#= context_menu_link l(:button_inline_edit), '#', :onclick => "$('#query_form').attr('action', '"+(@project ? edit_multiple_project_inline_issues_path(@project, :ids => @issue_ids) : edit_multiple_inline_issues_path(:ids => @issue_ids, :back_url => params[:back_url]))+"').submit();", :class => 'icon-edit', :disabled => !@can[:edit] %>
+        <%= context_menu_link l(:button_inline_edit), @project ? edit_multiple_project_inline_issues_path(@project, :ids => ids_param, :c => col) : edit_multiple_inline_issues_path(:ids => ids_param, :back_url => params[:back_url], :c => col), :disabled => !@can[:edit] %>
     </li>
 <% end %>
