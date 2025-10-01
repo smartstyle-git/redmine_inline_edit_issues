@@ -4,4 +4,9 @@ ja:
   permission_issues_inline_edit: インライン編集
   label_no_issues_selected: チケットが選択されていません
   button_accept_edit: 編集を受け入れる
+  label_add_new_issue: 新規チケット追加
+  label_add_another_issue: + チケットを追加
+  label_new_issue: 新規チケット
+  label_created: を作成しました
+  label_issues_created: 作成されたチケット
 

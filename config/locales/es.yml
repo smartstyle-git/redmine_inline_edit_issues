@@ -5,3 +5,8 @@ es:
   permission_issues_inline_edit: Editar en linea
   label_no_issues_selected: No se ha seleccionado ninguna petición
   button_accept_edit: Aceptar y editar
+  label_add_new_issue: Agregar nueva petición
+  label_add_another_issue: + Agregar otra petición
+  label_new_issue: Nueva petición
+  label_created: creada
+  label_issues_created: Peticiones creadas

@@ -1,0 +1,72 @@
+<div id="new-issues-container">
+  <table class="new-issue-table">
+    <tbody id="new-issues-tbody">
+      <tr class="new-issue-row-data" data-index="0">
+        <td>
+          <%= label_tag 'new_issues_0_tracker_id', raw("#{l(:field_tracker)} <span style='color:red;'>*</span>"), style: 'font-weight: bold;' %>
+          <%= select_tag 'new_issues[0][tracker_id]', 
+              options_for_select(project.trackers.collect { |t| [t.name, t.id] }), 
+              include_blank: true,
+              class: 'new-issue-tracker' %>
+        </td>
+        <td>
+          <%= label_tag 'new_issues_0_subject', raw("#{l(:field_subject)} <span style='color:red;'>*</span>"), style: 'font-weight: bold;' %>
+          <%= text_field_tag 'new_issues[0][subject]', '', 
+              placeholder: l(:field_subject),
+              class: 'new-issue-subject',
+              size: 40 %>
+        </td>
+        <td>
+          <%= label_tag 'new_issues_0_status_id', l(:field_status), style: 'font-weight: bold;' %>
+          <%= select_tag 'new_issues[0][status_id]', 
+              options_for_select(IssueStatus.sorted.collect { |s| [s.name, s.id] }, 
+                                 IssueStatus.sorted.first&.id),
+              class: 'new-issue-status' %>
+        </td>
+        <td>
+          <%= label_tag 'new_issues_0_priority_id', l(:field_priority), style: 'font-weight: bold;' %>
+          <%= select_tag 'new_issues[0][priority_id]', 
+              options_for_select(IssuePriority.active.collect { |p| [p.name, p.id] }, 
+                                 IssuePriority.active.where(is_default: true).first&.id || IssuePriority.active.first&.id),
+              class: 'new-issue-priority' %>
+        </td>
+        <td>
+          <%= label_tag 'new_issues_0_assigned_to_id', l(:field_assigned_to), style: 'font-weight: bold;' %>
+          <%= select_tag 'new_issues[0][assigned_to_id]', 
+              options_for_select(project.assignable_users.collect { |u| [u.name, u.id] }), 
+              include_blank: true,
+              class: 'new-issue-assigned-to' %>
+        </td>
+        <td>
+          <%= label_tag 'new_issues_0_fixed_version_id', l(:field_fixed_version), style: 'font-weight: bold;' %>
+          <%= select_tag 'new_issues[0][fixed_version_id]', 
+              options_for_select(project.shared_versions.collect { |v| [v.name, v.id] }), 
+              include_blank: true,
+              class: 'new-issue-version' %>
+        </td>
+        <td>
+          <%= label_tag 'new_issues_0_start_date', l(:field_start_date), style: 'font-weight: bold;' %>
+          <%= date_field_tag 'new_issues[0][start_date]', '', 
+              class: 'new-issue-start-date' %>
+        </td>
+        <td>
+          <%= label_tag 'new_issues_0_due_date', l(:field_due_date), style: 'font-weight: bold;' %>
+          <%= date_field_tag 'new_issues[0][due_date]', '', 
+              class: 'new-issue-due-date' %>
+        </td>
+        <td>
+          <%= label_tag 'new_issues_0_description', l(:field_description), style: 'font-weight: bold;' %>
+          <%= text_area_tag 'new_issues[0][description]', '', 
+              placeholder: l(:field_description),
+              class: 'new-issue-description',
+              rows: 2,
+              cols: 40 %>
+        </td>
+        <td style="vertical-align: middle; text-align: center;">
+          <button type="button" class="remove-new-issue" style="display:none; padding: 2px 8px; background: #d9534f; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 16px; font-weight: bold;">-</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+

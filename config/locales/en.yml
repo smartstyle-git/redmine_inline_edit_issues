@@ -5,3 +5,8 @@ en:
   permission_issues_inline_edit: Edit inline
   label_no_issues_selected: No issues selected
   button_accept_edit: Accept and edit
+  label_add_new_issue: Add new issue
+  label_add_another_issue: + Add another issue
+  label_new_issue: New issue
+  label_created: created
+  label_issues_created: Issues created

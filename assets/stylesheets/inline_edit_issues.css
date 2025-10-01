@@ -73,3 +73,62 @@ table tbody td {
 .add-relation input.relation-issue-id {
     width: 80px !important;
 }
+
+/* New issue row styles */
+.new-issue-row {
+    background: #f0f8ff !important;
+    border-top: 2px solid #4a90e2;
+}
+
+#new-issues-container {
+    max-height: 600px;
+    overflow-y: auto;
+    overflow-x: auto;
+}
+
+.new-issue-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.new-issue-row-data td {
+    padding: 8px;
+    vertical-align: top;
+    white-space: nowrap;
+}
+
+.new-issue-row-data label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 3px;
+}
+
+.new-issue-row-data select,
+.new-issue-row-data input[type="text"],
+.new-issue-row-data input[type="date"],
+.new-issue-row-data textarea {
+    width: 100% !important;
+    box-sizing: border-box;
+}
+
+.new-issue-row-data textarea {
+    resize: vertical;
+    white-space: normal;
+}
+
+.remove-new-issue {
+    cursor: pointer;
+}
+
+.remove-new-issue:hover {
+    background: #c9302c !important;
+}
+
+#add-new-issue-row {
+    display: inline-block;
+    cursor: pointer;
+}
+
+#add-new-issue-row:hover {
+    background: #449d44 !important;
+}

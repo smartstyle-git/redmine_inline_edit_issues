@@ -167,4 +167,89 @@ $(document).ready(function () {
         };
     }
 
+    // Add new issue row functionality
+    var newIssueIndex = 1;
+    
+    // Use document-level delegation to ensure button works
+    $(document).on('click', '#add-new-issue-row', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        console.log('Add button clicked, current index:', newIssueIndex);
+        
+        var $firstRow = $('.new-issue-row-data').first();
+        var $newRow = $firstRow.clone();
+        
+        // Update indices and clear values
+        $newRow.attr('data-index', newIssueIndex);
+        $newRow.find('input, select, textarea').each(function() {
+            var name = $(this).attr('name');
+            if (name) {
+                // Replace all occurrences of [0] with [newIssueIndex]
+                var newName = name.replace(/\[0\]/g, '[' + newIssueIndex + ']');
+                $(this).attr('name', newName);
+                console.log('Updated name from', name, 'to', newName);
+            }
+            var id = $(this).attr('id');
+            if (id) {
+                // Replace _0_ pattern (e.g., new_issues_0_subject -> new_issues_1_subject)
+                var newId = id.replace(/new_issues_\d+_/g, 'new_issues_' + newIssueIndex + '_');
+                $(this).attr('id', newId);
+                console.log('Updated id from', id, 'to', newId);
+            }
+            
+            // Clear values
+            if ($(this).is('select')) {
+                $(this).val('');
+            } else if (!$(this).is(':checkbox') && !$(this).is(':radio')) {
+                $(this).val('');
+            }
+        });
+        
+        // Update labels
+        $newRow.find('label').each(function() {
+            var forAttr = $(this).attr('for');
+            if (forAttr) {
+                var newFor = forAttr.replace(/new_issues_\d+_/g, 'new_issues_' + newIssueIndex + '_');
+                $(this).attr('for', newFor);
+                console.log('Updated label for from', forAttr, 'to', newFor);
+            }
+        });
+        
+        // Show remove button
+        $newRow.find('.remove-new-issue').show();
+        
+        // Add visual separator
+        $newRow.css('border-top', '2px solid #ccc');
+        $newRow.css('padding-top', '10px');
+        
+        $('#new-issues-tbody').append($newRow);
+        
+        console.log('New row added with index:', newIssueIndex);
+        newIssueIndex++;
+        
+        // Update remove buttons visibility
+        updateRemoveButtons();
+    });
+    
+    // Remove new issue row
+    $(document).on('click', '.remove-new-issue', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        console.log('Remove button clicked'); // Debug log
+        
+        $(this).closest('.new-issue-row-data').remove();
+        updateRemoveButtons();
+    });
+    
+    function updateRemoveButtons() {
+        var $rows = $('.new-issue-row-data');
+        if ($rows.length > 1) {
+            $rows.find('.remove-new-issue').show();
+        } else {
+            $rows.find('.remove-new-issue').hide();
+        }
+    }
+
 });

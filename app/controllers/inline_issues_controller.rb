@@ -56,6 +56,8 @@ class InlineIssuesController < ApplicationController
 
   def update_multiple
     errors = []
+    new_issue_created = nil
+    
     puts params[:issues].inspect
     Issue.find(params[:issues].keys).each do |i|
       issue_params = params[:issues][i.id.to_s]
@@ -96,12 +98,36 @@ class InlineIssuesController < ApplicationController
         end
       end
     end
+    
+    # Process new issues creation
+    created_issues = []
+    if params[:new_issues].present?
+      params[:new_issues].each do |index, new_issue_params|
+        next if new_issue_params[:subject].blank?
+        
+        new_issue_hash = new_issue_params.to_unsafe_h
+        new_issue = Issue.new(new_issue_hash)
+        new_issue.project = @project
+        new_issue.author = User.current
+        
+        if new_issue.save
+          created_issues << new_issue
+        else
+          errors += new_issue.errors.full_messages.map { |m| "#{l(:label_new_issue)} #{index.to_i + 1}: " + m }
+        end
+      end
+    end
 
     if errors.present?
       flash[:error] = errors.to_sentence
       redirect_back(fallback_location: root_path)
     else
-      flash[:notice] = l(:notice_successful_update)
+      success_message = l(:notice_successful_update)
+      if created_issues.any?
+        issue_numbers = created_issues.map { |i| "##{i.id}" }.join(', ')
+        success_message += " #{l(:label_issues_created)}: #{issue_numbers}"
+      end
+      flash[:notice] = success_message
       redirect_back_or_default params[:back_url] #_project_issues_path(@project)
     end
   end
