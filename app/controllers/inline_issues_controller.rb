@@ -58,9 +58,43 @@ class InlineIssuesController < ApplicationController
     errors = []
     puts params[:issues].inspect
     Issue.find(params[:issues].keys).each do |i|
-      attribute_hash = params[:issues][i.id.to_s].to_unsafe_h
+      issue_params = params[:issues][i.id.to_s]
+      
+      # Extract relation parameters
+      delete_relation_ids = issue_params.delete(:delete_relation_ids)
+      new_relation_type = issue_params.delete(:new_relation_type)
+      new_relation_issue_id = issue_params.delete(:new_relation_issue_id)
+      
+      # Update issue attributes
+      attribute_hash = issue_params.to_unsafe_h
       upd = i.update(attribute_hash)
       errors += i.errors.full_messages.map { |m| l(:label_issue) + " #{i.id}: " + m } if !upd
+      
+      # Process relation deletions
+      if delete_relation_ids.present?
+        IssueRelation.where(id: delete_relation_ids, issue_from_id: i.id).destroy_all
+        IssueRelation.where(id: delete_relation_ids, issue_to_id: i.id).destroy_all
+      end
+      
+      # Process new relation
+      if new_relation_type.present? && new_relation_issue_id.present?
+        # Remove # if present
+        target_id = new_relation_issue_id.to_s.gsub(/^#/, '').to_i
+        target_issue = Issue.visible.find_by(id: target_id)
+        
+        if target_issue
+          relation = IssueRelation.new(
+            issue_from: i,
+            issue_to: target_issue,
+            relation_type: new_relation_type
+          )
+          unless relation.save
+            errors += relation.errors.full_messages.map { |m| l(:label_issue) + " #{i.id}: " + m }
+          end
+        else
+          errors << "#{l(:label_issue)} #{i.id}: #{l(:label_issue)} ##{target_id} #{l(:notice_not_found)}"
+        end
+      end
     end
 
     if errors.present?

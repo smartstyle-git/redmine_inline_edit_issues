@@ -41,6 +41,8 @@ module InlineIssuesHelper
         f.select :category_id, [["", ""]] + issue.project.issue_categories.collect { |t| [t.name, t.id] }
       when :fixed_version
         f.select :fixed_version_id, [["", ""]] + issue.project.versions.collect { |t| [t.name, t.id] }
+      when :relations
+        render_issue_relations_form(issue, f)
       else
         column_display_text(column, issue)
       end
@@ -113,6 +115,75 @@ module InlineIssuesHelper
     else
       ""
     end
+  end
+
+  def render_issue_relations_form(issue, f)
+    content = ''.html_safe
+    
+    # Display existing relations with delete checkboxes
+    issue.relations.each do |relation|
+      other_issue = relation.other_issue(issue)
+      next unless other_issue && other_issue.visible?
+      
+      relation_label = "#{l(relation.label_for(issue))} ##{other_issue.id}"
+      checkbox_name = "issues[#{issue.id}][delete_relation_ids][]"
+      
+      content << content_tag(:div, class: 'relation-item') do
+        check_box_tag(checkbox_name, relation.id, false, id: "issue_#{issue.id}_delete_relation_#{relation.id}") +
+        label_tag("issue_#{issue.id}_delete_relation_#{relation.id}", "#{l(:button_delete)} #{relation_label}")
+      end
+    end
+    
+    # Get available issues for the datalist
+    available_issues = Issue.visible
+                            .where(project_id: issue.project_id)
+                            .where.not(id: issue.id)
+                            .order(id: :desc)
+                            .limit(500)
+                            .pluck(:id, :subject)
+    
+    datalist_id = "issue_#{issue.id}_available_issues"
+    
+    # Add new relation fields
+    content << content_tag(:div, class: 'add-relation') do
+      select_html = select_tag(
+        "issues[#{issue.id}][new_relation_type]",
+        options_for_select([
+          ['', ''],
+          [l(:label_relates_to), IssueRelation::TYPE_RELATES],
+          [l(:label_duplicates), IssueRelation::TYPE_DUPLICATES],
+          [l(:label_duplicated_by), IssueRelation::TYPE_DUPLICATED],
+          [l(:label_blocks), IssueRelation::TYPE_BLOCKS],
+          [l(:label_blocked_by), IssueRelation::TYPE_BLOCKED],
+          [l(:label_precedes), IssueRelation::TYPE_PRECEDES],
+          [l(:label_follows), IssueRelation::TYPE_FOLLOWS],
+          [l(:label_copied_to), IssueRelation::TYPE_COPIED_TO],
+          [l(:label_copied_from), IssueRelation::TYPE_COPIED_FROM]
+        ]),
+        class: 'relation-type'
+      )
+      
+      issue_field = text_field_tag(
+        "issues[#{issue.id}][new_relation_issue_id]",
+        '',
+        placeholder: '#123',
+        size: 12,
+        class: 'relation-issue-id',
+        list: datalist_id
+      )
+      
+      datalist = content_tag(:datalist, id: datalist_id) do
+        available_issues.map do |id, subject|
+          content_tag(:option, value: id) do
+            "##{id} - #{subject.truncate(50)}"
+          end
+        end.join.html_safe
+      end
+      
+      select_html + ' ' + issue_field + datalist
+    end
+    
+    content
   end
 
   private

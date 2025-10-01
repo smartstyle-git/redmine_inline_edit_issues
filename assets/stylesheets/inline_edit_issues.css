@@ -41,3 +41,35 @@ td input, td span.select2, td select {
 table tbody td {
     text-align: center !important;
 }
+
+/* Relation editing styles */
+.relation-item {
+    margin-bottom: 5px;
+    font-size: 0.9em;
+}
+
+.relation-item input[type="checkbox"] {
+    width: auto !important;
+    margin-right: 5px;
+}
+
+.relation-item label {
+    display: inline;
+    font-weight: normal;
+}
+
+.add-relation {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.add-relation select.relation-type {
+    width: auto !important;
+    max-width: 120px;
+    margin-right: 5px;
+}
+
+.add-relation input.relation-issue-id {
+    width: 80px !important;
+}
