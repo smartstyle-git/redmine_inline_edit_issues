@@ -48,7 +48,13 @@ module InlineIssuesHelper
   end
 
   def column_display_text(column, issue)
-    value = column.value(issue)
+    begin
+      value = column.value(issue)
+    rescue NoMethodError => e
+      # Redmine 6 compatibility: Handle dot-notation columns like 'parent.subject'
+      value = column.value_object(issue) if column.respond_to?(:value_object)
+      value ||= ''
+    end
 
     case value.class.name
     when 'Time'
