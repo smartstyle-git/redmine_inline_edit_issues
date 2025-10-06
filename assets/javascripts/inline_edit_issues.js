@@ -244,27 +244,30 @@ $(document).ready(function () {
                 console.log('Updated id from', id, 'to', newId);
             }
             
-            // Clear values
+            // Clear values (except fields with defaults)
+            // デフォルト値を持つフィールドは保持する
+            var keepDefaults = [
+                'new-issue-tracker',
+                'new-issue-status', 
+                'new-issue-priority',
+                'new-issue-assigned-to',
+                'new-issue-category',
+                'new-issue-done-ratio'
+            ];
+            
+            var hasDefaultClass = keepDefaults.some(function(cls) {
+                return $(this).hasClass(cls);
+            }.bind(this));
+            
             if ($(this).is('select')) {
-                // ステータス以外をクリア
-                if (!$(this).hasClass('new-issue-status')) {
+                // デフォルト値を持つフィールドはクリアしない
+                if (!hasDefaultClass) {
                     $(this).val('');
                 }
             } else if (!$(this).is(':checkbox') && !$(this).is(':radio')) {
                 $(this).val('');
             }
         });
-        
-        // トラッカーは未選択にし、ステータスも空白にする
-        var $newTracker = $newRow.find('.new-issue-tracker');
-        var $newStatus = $newRow.find('.new-issue-status');
-        
-        // トラッカーをクリア
-        $newTracker.val('');
-        
-        // ステータスもクリア
-        $newStatus.empty();
-        $newStatus.append($('<option>', { value: '', text: '' }));
         
         // Update labels
         $newRow.find('label').each(function() {
@@ -284,6 +287,27 @@ $(document).ready(function () {
         
         console.log('New row added with index:', newIssueIndex);
         newIssueIndex++;
+        
+        // 新しい行のトラッカーとステータスを初期化
+        // トラッカーのデフォルト値を取得（最初の行と同じ値）
+        var defaultTrackerValue = $('.new-issue-row-data').first().find('.new-issue-tracker').val();
+        console.log('Default tracker value for new row:', defaultTrackerValue);
+        
+        // 新しい行のトラッカーとステータスを取得（hidden fieldも含む）
+        var $newTracker = $newRow.find('.new-issue-tracker');
+        var $newStatus = $newRow.find('.new-issue-status');
+        
+        // トラッカーのデフォルト値を設定
+        if ($newTracker.length > 0) {
+            $newTracker.val(defaultTrackerValue);
+            console.log('Set tracker to:', defaultTrackerValue);
+        }
+        
+        // ステータスを更新
+        if ($newStatus.length > 0 && defaultTrackerValue) {
+            updateStatusOptions($newTracker);
+            console.log('Updated status options for new row');
+        }
         
         // Update remove buttons visibility
         updateRemoveButtons();

@@ -45,6 +45,27 @@ class InlineIssuesController < ApplicationController
       # デフォルトトラッカーを設定
       @default_tracker = @project.trackers.first
       
+      # デフォルト値を設定
+      # 担当者: プロジェクトのデフォルト担当者
+      @default_assigned_to_id = @project.try(:default_assigned_to_id)
+      
+      # 優先度: is_defaultがtrueのもの
+      @default_priority_id = IssuePriority.default&.id || IssuePriority.active.first&.id
+      
+      # カテゴリ: Redmineのカテゴリにはデフォルト設定がないため、nilのまま
+      @default_category_id = nil
+      
+      # 進捗率: 0%
+      @default_done_ratio = 0
+      
+      # デバッグログ
+      Rails.logger.info "=== Default Values Debug ==="
+      Rails.logger.info "Default tracker: #{@default_tracker&.name} (ID: #{@default_tracker&.id})"
+      Rails.logger.info "Default assigned_to (from project): #{@project.try(:default_assigned_to)&.name} (ID: #{@default_assigned_to_id})"
+      Rails.logger.info "Default priority: #{IssuePriority.find_by(id: @default_priority_id)&.name} (ID: #{@default_priority_id})"
+      Rails.logger.info "Default category_id: #{@default_category_id}"
+      Rails.logger.info "Default done_ratio: #{@default_done_ratio}"
+      
       # トラッカーごとの新規作成時に利用可能なステータスを取得
       @tracker_statuses = {}
       @tracker_default_status_ids = {}

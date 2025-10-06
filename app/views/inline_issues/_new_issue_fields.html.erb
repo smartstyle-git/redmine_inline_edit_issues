@@ -37,12 +37,11 @@
             } %>
       <% when :priority %>
         <%= select_tag 'new_issues[0][priority_id]', 
-            options_for_select(IssuePriority.active.collect { |p| [p.name, p.id] }, 
-                               IssuePriority.active.where(is_default: true).first&.id || IssuePriority.active.first&.id),
+            options_for_select(IssuePriority.active.collect { |p| [p.name, p.id] }, @default_priority_id),
             class: 'new-issue-priority' %>
       <% when :assigned_to %>
         <%= select_tag 'new_issues[0][assigned_to_id]', 
-            options_for_select(project.assignable_users.collect { |u| [u.name, u.id] }), 
+            options_for_select(project.assignable_users.collect { |u| [u.name, u.id] }, @default_assigned_to_id), 
             include_blank: true,
             class: 'new-issue-assigned-to' %>
       <% when :fixed_version %>
@@ -65,7 +64,7 @@
             rows: 2 %>
       <% when :category %>
         <%= select_tag 'new_issues[0][category_id]', 
-            options_for_select(project.issue_categories.collect { |c| [c.name, c.id] }), 
+            options_for_select(project.issue_categories.collect { |c| [c.name, c.id] }, @default_category_id), 
             include_blank: true,
             class: 'new-issue-category' %>
       <% when :estimated_hours %>
@@ -74,7 +73,7 @@
             class: 'new-issue-estimated-hours' %>
       <% when :done_ratio %>
         <%= select_tag 'new_issues[0][done_ratio]', 
-            options_for_select(((0..10).to_a.collect { |r| ["#{r * 10} %", r * 10] })),
+            options_for_select(((0..10).to_a.collect { |r| ["#{r * 10} %", r * 10] }), @default_done_ratio),
             include_blank: true,
             class: 'new-issue-done-ratio' %>
       <% else %>
