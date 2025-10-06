@@ -41,6 +41,31 @@ class InlineIssuesController < ApplicationController
       @issue_count_by_group = issue_count_by_group
 
       @priorities = IssuePriority.active
+      
+      # トラッカーごとの新規作成時に利用可能なステータスを取得
+      @tracker_statuses = {}
+      @project.trackers.each do |tracker|
+        # 新規作成時のワークフロー (old_status_id = 0) から利用可能なステータスを取得
+        # 管理者であってもワークフロー設定に従う
+        status_ids = WorkflowTransition.where(
+          tracker_id: tracker.id,
+          old_status_id: 0  # 0 = 新規作成時
+        ).distinct.pluck(:new_status_id)
+        
+        if status_ids.present?
+          allowed_statuses = IssueStatus.where(id: status_ids).sorted.to_a
+        else
+          # ワークフローが設定されていない場合は全ステータスを許可
+          allowed_statuses = IssueStatus.sorted.to_a
+        end
+        
+        # デバッグログ
+        Rails.logger.info "=== Workflow Debug for Tracker: #{tracker.name} (ID: #{tracker.id}) ==="
+        Rails.logger.info "Status IDs from workflow: #{status_ids.inspect}"
+        Rails.logger.info "Allowed statuses: #{allowed_statuses.map(&:name).join(', ')}"
+        
+        @tracker_statuses[tracker.id] = allowed_statuses.collect { |s| [s.id, s.name] }
+      end
     else
       # respond_to do |format|
       # format.html { render(:template => 'issues/index', :layout => !request.xhr?) }

@@ -3,8 +3,9 @@
     <td class="<%= column.css_classes %>">
       <% case column.name %>
       <% when :tracker %>
+        <% default_tracker = project.trackers.first %>
         <%= select_tag 'new_issues[0][tracker_id]', 
-            options_for_select(project.trackers.collect { |t| [t.name, t.id] }), 
+            options_for_select(project.trackers.collect { |t| [t.name, t.id] }, default_tracker&.id), 
             include_blank: true,
             class: 'new-issue-tracker' %>
       <% when :subject %>
@@ -13,10 +14,16 @@
             class: 'new-issue-subject',
             size: 20 %>
       <% when :status %>
+        <% 
+          # デフォルトトラッカーの利用可能なステータスを取得
+          default_tracker = project.trackers.first
+          initial_statuses = default_tracker && @tracker_statuses[default_tracker.id] ? @tracker_statuses[default_tracker.id] : []
+          default_status_id = initial_statuses.first&.first if initial_statuses.any?
+        %>
         <%= select_tag 'new_issues[0][status_id]', 
-            options_for_select(IssueStatus.sorted.collect { |s| [s.name, s.id] }, 
-                               IssueStatus.sorted.first&.id),
-            class: 'new-issue-status' %>
+            options_for_select(initial_statuses.collect { |id, name| [name, id] }, default_status_id),
+            class: 'new-issue-status',
+            data: { tracker_statuses: @tracker_statuses.to_json } %>
       <% when :priority %>
         <%= select_tag 'new_issues[0][priority_id]', 
             options_for_select(IssuePriority.active.collect { |p| [p.name, p.id] }, 

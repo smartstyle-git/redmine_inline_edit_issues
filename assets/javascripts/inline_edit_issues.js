@@ -149,6 +149,68 @@ $(document).ready(function () {
         };
     }
 
+    // トラッカー変更時にステータスをフィルタリング（Redmine標準の動作に準拠）
+    function updateStatusOptions($trackerSelect) {
+        var trackerId = $trackerSelect.val();
+        var $row = $trackerSelect.closest('.new-issue-row-data');
+        var $statusSelect = $row.find('.new-issue-status');
+        
+        console.log('updateStatusOptions called - trackerId:', trackerId, 'type:', typeof trackerId);
+        
+        // data属性からワークフロー情報を取得（最初の行にのみ存在）
+        var trackerStatuses = $('.new-issue-status').first().data('tracker-statuses');
+        console.log('trackerStatuses:', trackerStatuses);
+        
+        // trackerIdを文字列に変換（data属性のキーは文字列の可能性があるため）
+        var trackerKey = String(trackerId);
+        console.log('Looking for tracker key:', trackerKey);
+        
+        if (trackerId && trackerStatuses && (trackerStatuses[trackerId] || trackerStatuses[trackerKey])) {
+            var allowedStatuses = trackerStatuses[trackerId] || trackerStatuses[trackerKey];
+            console.log('allowedStatuses for tracker', trackerId, ':', allowedStatuses);
+            
+            // 現在の選択値を保持
+            var currentValue = $statusSelect.val();
+            
+            // ステータスのオプションを更新
+            $statusSelect.empty();
+            allowedStatuses.forEach(function(status) {
+                $statusSelect.append($('<option>', {
+                    value: status[0],
+                    text: status[1]
+                }));
+            });
+            
+            // 以前の選択値が新しいオプションに存在する場合は維持、なければ最初の値を選択
+            if (allowedStatuses.some(function(s) { return s[0] == currentValue; })) {
+                $statusSelect.val(currentValue);
+            } else if (allowedStatuses.length > 0) {
+                $statusSelect.val(allowedStatuses[0][0]);
+            }
+            console.log('Status updated to:', $statusSelect.val());
+        } else if (!trackerId || trackerId === '') {
+            // トラッカーが未選択の場合はステータスをクリア
+            console.log('Tracker not selected, clearing status');
+            $statusSelect.empty();
+            $statusSelect.append($('<option>', { value: '', text: '' }));
+        }
+    }
+    
+    $(document).on('change', '.new-issue-tracker', function() {
+        console.log('Tracker changed');
+        updateStatusOptions($(this));
+    });
+    
+    // ページ読み込み時に既存の行のトラッカーが選択されている場合、ステータスを初期化
+    $('.new-issue-row-data').each(function() {
+        var $row = $(this);
+        var $tracker = $row.find('.new-issue-tracker');
+        if ($tracker.val()) {
+            console.log('Initializing status for existing row with tracker:', $tracker.val());
+            updateStatusOptions($tracker);
+        }
+    });
+
     // Add new issue row functionality
     var newIssueIndex = 1;
     
@@ -182,11 +244,25 @@ $(document).ready(function () {
             
             // Clear values
             if ($(this).is('select')) {
-                $(this).val('');
+                // ステータス以外をクリア
+                if (!$(this).hasClass('new-issue-status')) {
+                    $(this).val('');
+                }
             } else if (!$(this).is(':checkbox') && !$(this).is(':radio')) {
                 $(this).val('');
             }
         });
+        
+        // トラッカーは未選択にし、ステータスも空白にする
+        var $newTracker = $newRow.find('.new-issue-tracker');
+        var $newStatus = $newRow.find('.new-issue-status');
+        
+        // トラッカーをクリア
+        $newTracker.val('');
+        
+        // ステータスもクリア
+        $newStatus.empty();
+        $newStatus.append($('<option>', { value: '', text: '' }));
         
         // Update labels
         $newRow.find('label').each(function() {
