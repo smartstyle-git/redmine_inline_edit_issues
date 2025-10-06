@@ -42,8 +42,12 @@ class InlineIssuesController < ApplicationController
 
       @priorities = IssuePriority.active
       
+      # デフォルトトラッカーを設定
+      @default_tracker = @project.trackers.first
+      
       # トラッカーごとの新規作成時に利用可能なステータスを取得
       @tracker_statuses = {}
+      @tracker_default_status_ids = {}
       @project.trackers.each do |tracker|
         # 新規作成時のワークフロー (old_status_id = 0) から利用可能なステータスを取得
         # 管理者であってもワークフロー設定に従う
@@ -59,10 +63,21 @@ class InlineIssuesController < ApplicationController
           allowed_statuses = IssueStatus.sorted.to_a
         end
         
+        # トラッカーのデフォルトステータスを取得（ワークフローで許可されている場合）
+        tracker_default_status = tracker.default_status
+        if tracker_default_status && allowed_statuses.include?(tracker_default_status)
+          @tracker_default_status_ids[tracker.id] = tracker_default_status.id
+        elsif allowed_statuses.any?
+          # デフォルトステータスが許可されていない場合は、最初の許可されたステータスを使用
+          @tracker_default_status_ids[tracker.id] = allowed_statuses.first.id
+        end
+        
         # デバッグログ
         Rails.logger.info "=== Workflow Debug for Tracker: #{tracker.name} (ID: #{tracker.id}) ==="
+        Rails.logger.info "Tracker default status: #{tracker_default_status&.name}"
         Rails.logger.info "Status IDs from workflow: #{status_ids.inspect}"
         Rails.logger.info "Allowed statuses: #{allowed_statuses.map(&:name).join(', ')}"
+        Rails.logger.info "Selected default status ID: #{@tracker_default_status_ids[tracker.id]}"
         
         @tracker_statuses[tracker.id] = allowed_statuses.collect { |s| [s.id, s.name] }
       end

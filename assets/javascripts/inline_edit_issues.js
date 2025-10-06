@@ -159,7 +159,9 @@ $(document).ready(function () {
         
         // data属性からワークフロー情報を取得（最初の行にのみ存在）
         var trackerStatuses = $('.new-issue-status').first().data('tracker-statuses');
+        var trackerDefaultStatusIds = $('.new-issue-status').first().data('tracker-default-status-ids');
         console.log('trackerStatuses:', trackerStatuses);
+        console.log('trackerDefaultStatusIds:', trackerDefaultStatusIds);
         
         // trackerIdを文字列に変換（data属性のキーは文字列の可能性があるため）
         var trackerKey = String(trackerId);
@@ -167,10 +169,10 @@ $(document).ready(function () {
         
         if (trackerId && trackerStatuses && (trackerStatuses[trackerId] || trackerStatuses[trackerKey])) {
             var allowedStatuses = trackerStatuses[trackerId] || trackerStatuses[trackerKey];
-            console.log('allowedStatuses for tracker', trackerId, ':', allowedStatuses);
+            var defaultStatusId = trackerDefaultStatusIds ? (trackerDefaultStatusIds[trackerId] || trackerDefaultStatusIds[trackerKey]) : null;
             
-            // 現在の選択値を保持
-            var currentValue = $statusSelect.val();
+            console.log('allowedStatuses for tracker', trackerId, ':', allowedStatuses);
+            console.log('defaultStatusId for tracker', trackerId, ':', defaultStatusId);
             
             // ステータスのオプションを更新
             $statusSelect.empty();
@@ -181,9 +183,9 @@ $(document).ready(function () {
                 }));
             });
             
-            // 以前の選択値が新しいオプションに存在する場合は維持、なければ最初の値を選択
-            if (allowedStatuses.some(function(s) { return s[0] == currentValue; })) {
-                $statusSelect.val(currentValue);
+            // トラッカーのデフォルトステータスを選択、なければ最初の値を選択
+            if (defaultStatusId && allowedStatuses.some(function(s) { return s[0] == defaultStatusId; })) {
+                $statusSelect.val(defaultStatusId);
             } else if (allowedStatuses.length > 0) {
                 $statusSelect.val(allowedStatuses[0][0]);
             }

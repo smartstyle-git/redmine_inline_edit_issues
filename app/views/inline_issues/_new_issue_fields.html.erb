@@ -1,11 +1,20 @@
 <tr class="new-issue-row-data" data-index="0">
+  <%
+    # トラッカー列が含まれているか確認
+    has_tracker_column = @query_inline_columns.any? { |c| c.name == :tracker }
+  %>
+  
+  <% unless has_tracker_column %>
+    <%# トラッカー列がない場合は、hidden fieldでデフォルトトラッカーを設定 %>
+    <%= hidden_field_tag 'new_issues[0][tracker_id]', @default_tracker&.id, class: 'new-issue-tracker' %>
+  <% end %>
+  
   <% @query_inline_columns.each_with_index do |column, index| %>
     <td class="<%= column.css_classes %>">
       <% case column.name %>
       <% when :tracker %>
-        <% default_tracker = project.trackers.first %>
         <%= select_tag 'new_issues[0][tracker_id]', 
-            options_for_select(project.trackers.collect { |t| [t.name, t.id] }, default_tracker&.id), 
+            options_for_select(project.trackers.collect { |t| [t.name, t.id] }, @default_tracker&.id), 
             include_blank: true,
             class: 'new-issue-tracker' %>
       <% when :subject %>
@@ -15,15 +24,17 @@
             size: 20 %>
       <% when :status %>
         <% 
-          # デフォルトトラッカーの利用可能なステータスを取得
-          default_tracker = project.trackers.first
-          initial_statuses = default_tracker && @tracker_statuses[default_tracker.id] ? @tracker_statuses[default_tracker.id] : []
-          default_status_id = initial_statuses.first&.first if initial_statuses.any?
+          # デフォルトトラッカーのデフォルトステータスを取得
+          initial_statuses = @default_tracker && @tracker_statuses[@default_tracker.id] ? @tracker_statuses[@default_tracker.id] : []
+          default_status_id = @default_tracker && @tracker_default_status_ids[@default_tracker.id] ? @tracker_default_status_ids[@default_tracker.id] : nil
         %>
         <%= select_tag 'new_issues[0][status_id]', 
             options_for_select(initial_statuses.collect { |id, name| [name, id] }, default_status_id),
             class: 'new-issue-status',
-            data: { tracker_statuses: @tracker_statuses.to_json } %>
+            data: { 
+              tracker_statuses: @tracker_statuses.to_json,
+              tracker_default_status_ids: @tracker_default_status_ids.to_json 
+            } %>
       <% when :priority %>
         <%= select_tag 'new_issues[0][priority_id]', 
             options_for_select(IssuePriority.active.collect { |p| [p.name, p.id] }, 
